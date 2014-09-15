@@ -22,7 +22,11 @@ module Acquia
         connection.basic_auth(options[:username], options[:password])
         response = connection.get "#{Acquia.cloud_api_version}/sites.json"
 
-        fail InvalidUserCredentials, "Invalid user credentials" if response.status == 401
+        fail InvalidUserCredentials, 'Invalid user credentials' if response.status == 401
+
+        # Haven't made a site selection? Looks like you get the first one we
+        # find.
+        options[:site] ||= JSON.parse(response.body).first
       end
 
       # Internal: Determine if the user is behind a firewall or proxy.
