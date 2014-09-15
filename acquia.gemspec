@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['jacob.bednarz@gmail.com']
   spec.summary       = 'Acquia Ruby SDK'
   spec.description   = 'A Ruby based SDK for interacting with the Acquia Hosting platform'
-  spec.homepage      = 'http://github.com/jacobbednarz/acquia'
+  spec.homepage      = 'http://github.com/jacobbednarz/acquia-sdk-ruby'
   spec.license       = 'MIT'
 
   spec.files         = Dir.glob("{bin,lib}/**/*") + %w(LICENSE README.md)

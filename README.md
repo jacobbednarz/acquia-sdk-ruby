@@ -36,9 +36,6 @@ client = Acquia::CloudApi::Client.new({
 # If you wish to leverage an existing cloudapi.conf or netrc entry, that is
 # supported as well - just don't pass in the details and it will find it for you.
 client = Acquia::CloudApi::Client.new
-
-# Check if you have successfully auth'd.
-client.authenticated?
 ```
 
 ## Using a proxy or firewall?
