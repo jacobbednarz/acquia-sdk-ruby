@@ -7,7 +7,7 @@ module Acquia
   #
   # Returns a string of the endpoint.
   def self.cloud_api_endpoint
-    "#{cloud_api_uri}/#{cloud_api_version}"
+    "#{cloud_api_uri}/#{cloud_api_version}/"
   end
 
   # Internal: The base URI of the Acquia Cloud API.

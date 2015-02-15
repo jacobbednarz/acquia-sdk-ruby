@@ -11,19 +11,18 @@ module Acquia
         # find our user details.
         options[:username] ||= user_credentials[:username]
         options[:password] ||= user_credentials[:password]
-
-        if proxy?
-          connection = Faraday.new(url: Acquia.cloud_api_uri, proxy: { uri: ENV['HTTPS_PROXY'] })
-        else
-          connection = Faraday.new(url: Acquia.cloud_api_uri)
+       
+        # Build our connection using a proxy and correct SSL options.
+        connection = Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
+          c.adapter Faraday.default_adapter
+          c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
+          c.basic_auth(options[:username], options[:password])
+          c.proxy = proxy_opts if proxy?
         end
-
-        connection.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
-        connection.basic_auth(options[:username], options[:password])
-        response = connection.get "#{Acquia.cloud_api_version}/sites.json"
-
+        
+        response = connection.get 'sites.json'
         fail InvalidUserCredentials, 'Invalid user credentials' if response.status == 401
-
+        
         # Haven't made a site selection? Looks like you get the first one we
         # find.
         options[:site] ||= JSON.parse(response.body).first
@@ -35,7 +34,21 @@ module Acquia
       def proxy?
         (ENV['HTTPS_PROXY'].nil?) ? false : true
       end
-
+    
+      # Internal: Define the proxy options for requests.
+      #
+      # Returns hash of proxy options.
+      def proxy_opts
+        { uri: ENV['HTTPS_PROXY'] }
+      end
+      
+      # Internal: Build the SSL options for requests.
+      #
+      # Returns a hash of the SSL options to apply to requests.
+      def ssl_opts
+        { verify: true, ca_file: File.expand_path('etc/ca.pem') }
+      end
+      
       # Internal: Get the user credentials from available sources.
       #
       # This method is responsible for checking the available sources and
@@ -74,8 +87,8 @@ module Acquia
           fail MissingNetrcConfiguration, "No entry for cloudapi.acquia.com found in #{netrc_path}"
         end
 
-        username = n['cloudapi.acquia.com'].first
-        password = n['cloudapi.acquia.com'].last
+        username = n['cloudapi.acquia.com'].login
+        password = n['cloudapi.acquia.com'].password
 
         { username: username, password: password }
       end
