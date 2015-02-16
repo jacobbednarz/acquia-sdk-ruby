@@ -1,6 +1,6 @@
-require 'acquia/version'
-require 'acquia/cloudapi'
-require 'acquia/exceptions'
+require 'acquia_sdk_ruby/version'
+require 'acquia_sdk_ruby/cloudapi'
+require 'acquia_sdk_ruby/exceptions'
 
 module Acquia
   # Internal: The Cloud API endpoint as a full URI.

@@ -1,1 +1,0 @@
-require 'acquia/cloudapi/client'

@@ -1,9 +1,9 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'acquia/version'
+require 'acquia_sdk_ruby/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'acquia'
+  spec.name          = 'acquia_sdk_ruby'
   spec.version       = Acquia::VERSION
   spec.authors       = ['Jacob Bednarz']
   spec.email         = ['jacob.bednarz@gmail.com']
