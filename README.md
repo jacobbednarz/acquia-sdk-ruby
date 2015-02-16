@@ -12,13 +12,13 @@ Acquia platform.
 Pop the following into your Gemfile.
 
 ```rb
-gem 'acquia'
+gem 'acquia_sdk_ruby'
 ```
 
 Or if you would like to install it yourself, try this:
 
 ```sh
-$ gem install acquia
+$ gem install acquia_sdk_ruby
 ```
 
 ## Usage examples
@@ -34,13 +34,16 @@ client = Acquia::CloudApi::Client.new({
 })
 
 # If you wish to leverage an existing cloudapi.conf or netrc entry, that is
-# supported as well - just don't pass in the details and it will find it for you.
+# supported as well - just don't pass in the details and it will find it for 
+# you.
 client = Acquia::CloudApi::Client.new
 ```
 
 ## Using a proxy or firewall?
 
-No problem! The Acquia gem includes the ability to leverage environment variables for defining proxies or firewall rules. Just define your gateway using the `HTTPS_PROXY` variable and it will be included for all requests.
+No problem! The Acquia gem includes the ability to leverage environment
+variables for defining proxies or firewall rules. Just define your gateway using
+the `HTTPS_PROXY` variable and it will be included for all requests.
 
 ## Contributing
 
