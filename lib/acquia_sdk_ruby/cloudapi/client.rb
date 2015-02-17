@@ -5,27 +5,32 @@ require 'json'
 module Acquia
   module CloudApi
     class Client
+
       def initialize(options = {})
         # Providing that we have both the username and the password, use it
         # otherwise we will run through the available authentication sources to
         # find our user details.
         options[:username] ||= user_credentials[:username]
         options[:password] ||= user_credentials[:password]
-       
-        # Build our connection using a proxy and correct SSL options.
-        connection = Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
-          c.adapter Faraday.default_adapter
-          c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
-          c.basic_auth(options[:username], options[:password])
-          c.proxy = proxy_opts if proxy?
-        end
-        
-        response = connection.get 'sites.json'
+
+        $client = create_connection(options)
+
+        response = $client.get 'sites.json'
         fail InvalidUserCredentials, 'Invalid user credentials' if response.status == 401
-        
+
         # Haven't made a site selection? Looks like you get the first one we
         # find.
         options[:site] ||= JSON.parse(response.body).first
+      end
+
+      def create_connection(options = {})
+        # Build our connection using a proxy and correct SSL options.
+        Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
+          c.adapter Faraday.default_adapter
+          c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
+          c.basic_auth(options[:username], options[:password])
+          c.proxy proxy_opts
+        end
       end
 
       # Internal: Determine if the user is behind a firewall or proxy.
@@ -34,21 +39,21 @@ module Acquia
       def proxy?
         (ENV['HTTPS_PROXY'].nil?) ? false : true
       end
-    
+
       # Internal: Define the proxy options for requests.
       #
-      # Returns hash of proxy options.
+      # Returns hash of proxy options or nil if not in use.
       def proxy_opts
-        { uri: ENV['HTTPS_PROXY'] }
+        (proxy?) ? { uri: ENV['HTTPS_PROXY'] } : nil
       end
-      
+
       # Internal: Build the SSL options for requests.
       #
       # Returns a hash of the SSL options to apply to requests.
       def ssl_opts
         { verify: true, ca_file: File.expand_path('etc/ca.pem') }
       end
-      
+
       # Internal: Get the user credentials from available sources.
       #
       # This method is responsible for checking the available sources and
