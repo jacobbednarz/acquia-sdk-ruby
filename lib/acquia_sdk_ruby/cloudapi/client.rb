@@ -5,6 +5,7 @@ require 'json'
 module Acquia
   module CloudApi
     class Client
+      attr_accessor :client
 
       def initialize(options = {})
         # Providing that we have both the username and the password, use it
@@ -13,9 +14,9 @@ module Acquia
         options[:username] ||= user_credentials[:username]
         options[:password] ||= user_credentials[:password]
 
-        $client = create_connection(options)
+        @client = build_client(options)
 
-        response = $client.get 'sites.json'
+        response = client.get 'sites.json'
         fail InvalidUserCredentials, 'Invalid user credentials' if response.status == 401
 
         # Haven't made a site selection? Looks like you get the first one we
@@ -23,8 +24,8 @@ module Acquia
         options[:site] ||= JSON.parse(response.body).first
       end
 
-      def create_connection(options = {})
-        # Build our connection using a proxy and correct SSL options.
+      def build_client(options = {})
+        # Build our client using a proxy and correct SSL options.
         Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
           c.adapter Faraday.default_adapter
           c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
