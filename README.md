@@ -34,9 +34,19 @@ client = Acquia::CloudApi::Client.new({
 })
 
 # If you wish to leverage an existing cloudapi.conf or netrc entry, that is
-# supported as well - just don't pass in the details and it will find it for 
+# supported as well - just don't pass in the details and it will find it for
 # you.
 client = Acquia::CloudApi::Client.new
+```
+
+### Make a request
+
+```rb
+client = Acquia::CloudApi::Client.new
+
+# Make a request to the 'sites.json' endpoint. This URL is relative to the
+# https://cloudapi.acquia.com/v1/ path.
+client.get 'sites.json'
 ```
 
 ## Using a proxy or firewall?
