@@ -15,13 +15,18 @@ module Acquia
         options[:password] ||= user_credentials[:password]
 
         @client = build_client(options)
+      # Text representation of the client, masking sensitive information.
+      #
+      # Returns a string.
+      def inspect
+        inspected = super
 
-        response = client.get 'sites.json'
-        fail InvalidUserCredentials, 'Invalid user credentials' if response.status == 401
+        # Mask the password.
+        if @options[:password]
+          inspected = inspected.gsub! @options[:password], conceal(@options[:password])
+        end
 
-        # Haven't made a site selection? Looks like you get the first one we
-        # find.
-        options[:site] ||= JSON.parse(response.body).first
+        inspected
       end
 
       def build_client(options = {})
@@ -32,6 +37,18 @@ module Acquia
           c.basic_auth(options[:username], options[:password])
           c.proxy proxy_opts
         end
+      # Internal: Conceal parts of the string.
+      #
+      # Example:
+      #
+      #   conceal "thisismysensitivestring"
+      #   # => "this****ring"
+      #
+      # Returns a string with only the first and last 4 characters visible.
+      def conceal(string)
+        front = string[0, 4]
+        back  = string[-4, 4]
+        "#{front}****#{back}"
       end
 
       # Internal: Determine if the user is behind a firewall or proxy.
