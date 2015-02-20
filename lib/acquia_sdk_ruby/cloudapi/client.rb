@@ -14,7 +14,9 @@ module Acquia
         options[:username] ||= user_credentials[:username]
         options[:password] ||= user_credentials[:password]
 
-        @client = build_client(options)
+        @options = options
+      end
+
       # Text representation of the client, masking sensitive information.
       #
       # Returns a string.
@@ -29,14 +31,23 @@ module Acquia
         inspected
       end
 
-      def build_client(options = {})
-        # Build our client using a proxy and correct SSL options.
-        Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
-          c.adapter Faraday.default_adapter
-          c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
-          c.basic_auth(options[:username], options[:password])
-          c.proxy proxy_opts
-        end
+      # Internal: Get the default site for the user.
+      #
+      # Returns a string containing the users first site.
+      def default_site
+        response = get 'sites.json'
+        response.first
+      end
+
+      # Public: Make a GET HTTP request.
+      #
+      # url - The URL to request.
+      #
+      # Returns a Faraday::Connection object.
+      def get(url)
+        request :get, url
+      end
+
       # Internal: Conceal parts of the string.
       #
       # Example:
@@ -128,6 +139,31 @@ module Acquia
       # Returns a string of the file path to the users netrc file.
       def netrc_path
         "#{Dir.home}/.netrc"
+      end
+
+      private
+
+      # Private: Make a HTTP request.
+      #
+      # url     - The relative URL of the resource to request.
+      # options - Hash of options to pass through to the request.
+      #
+      # Returns a JSON string of the body.
+      def request(method, url, options = {})
+        request = Faraday.new(url: Acquia.cloud_api_endpoint, ssl: ssl_opts) do |c|
+          c.adapter Faraday.default_adapter
+          c.headers['User-Agent'] = "Acquia SDK (#{Acquia::VERSION})"
+          c.basic_auth(@options[:username], @options[:password])
+          c.proxy proxy_opts
+          c.use Faraday::Response::RaiseError
+        end
+
+        case method
+        when :get
+          response = request.get url
+        end
+
+        JSON.parse(response.body)
       end
     end
   end
